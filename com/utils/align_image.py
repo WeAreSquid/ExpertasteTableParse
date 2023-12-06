@@ -54,12 +54,12 @@ class TransformImage():
                         homography, (width, height))
       
     # Save the output.
-    cv2.imwrite(r"C:\Users\ferbo\Desktop\GoogleDrive_ferboubeta2\other_projects\TableInImage\ExpertasteTableParse\templates\aligned_output.jpg", transformed_img)
+    #cv2.imwrite(r"C:\Users\ferbo\Desktop\GoogleDrive_ferboubeta2\other_projects\TableInImage\ExpertasteTableParse\templates\aligned_output.jpg", transformed_img)
 
   def align_second(self):
     # Load the template image and the image to be aligned
-    template_image = cv2.imread(r"C:\Users\ferbo\Desktop\GoogleDrive_ferboubeta2\other_projects\TableInImage\ExpertasteTableParse\templates\crop_initial_template.png") 
-    target_image = cv2.imread(r"C:\Users\ferbo\Desktop\GoogleDrive_ferboubeta2\other_projects\TableInImage\ExpertasteTableParse\templates\7_perspective_corrected_primera_foto.jpg")
+    #template_image = cv2.imread(r"C:\Users\ferbo\Desktop\GoogleDrive_ferboubeta2\other_projects\TableInImage\ExpertasteTableParse\templates\crop_initial_template.png") 
+    #target_image = cv2.imread(r"C:\Users\ferbo\Desktop\GoogleDrive_ferboubeta2\other_projects\TableInImage\ExpertasteTableParse\templates\7_perspective_corrected_primera_foto.jpg")
 
     # Detect and segment the tables (if needed)
 
@@ -85,9 +85,9 @@ class TransformImage():
     # Apply the transformation to align the target image with the template
     aligned_image = cv2.warpAffine(target_image, transformation_matrix, (template_image.shape[1], template_image.shape[0]))
     
-    cv2.imwrite(r"C:\Users\ferbo\Desktop\GoogleDrive_ferboubeta2\other_projects\TableInImage\ExpertasteTableParse\templates\aligned_output.jpg", aligned_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    #cv2.imwrite(r"C:\Users\ferbo\Desktop\GoogleDrive_ferboubeta2\other_projects\TableInImage\ExpertasteTableParse\templates\aligned_output.jpg", aligned_image)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
   
   def CompleteTable():
     return

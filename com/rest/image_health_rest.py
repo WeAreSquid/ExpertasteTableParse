@@ -16,7 +16,6 @@ request_service =  RequestService()
 
 from com.utils.ocr_check import OCRCheck
 
-
 router = APIRouter()
 @router.post('/image_health')
 async def image_health_rest(file: UploadFile = File(...)):
