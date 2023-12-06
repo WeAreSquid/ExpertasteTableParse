@@ -6,23 +6,23 @@ from com.utils.act_with_image import ActWithImage
 class ImageHealthService(ActWithImage):
     def clean_image(self, img, filename, ocr_model):
         self.set_image(img)
-        self.store_image(self.image, filename, prefix = '1_original')
+        #self.store_image(self.image, filename, prefix = '1_original')
         self.convert_image_to_grayscale()
-        self.store_image(self.grayscale_image, filename, prefix = '2_grayscale')
+        #self.store_image(self.grayscale_image, filename, prefix = '2_grayscale')
         self.get_threshold_value(self.grayscale_image, ocr_model)
         self.threshold_image(self.grayscale_image)
-        self.store_image(self.thresholded_image, filename, prefix = '3_threshold')
-        self.invert_image(self.thresholded_image)
-        self.store_image(self.inverted_image, filename, prefix = '4_inverted')
+        #self.store_image(self.thresholded_image, filename, prefix = '3_threshold')
+        self.invert_image(self.grayscale_image)
+        #self.store_image(self.inverted_image, filename, prefix = '4_inverted')
         self.dilate_image(self.inverted_image)
-        self.store_image(self.dilated_image, filename, prefix = '5_dilated')
+        #self.store_image(self.dilated_image, filename, prefix = '5_dilated')
         self.find_contours(self.dilated_image)
         self.filter_contours_and_leave_only_rectangles(self.dilated_image)
         self.find_largest_contour_by_area(self.dilated_image)
         self.order_points_in_the_contour_with_max_area(self.dilated_image)
         self.calculate_new_width_and_height_of_image(self.dilated_image)
         self.apply_perspective_transform(self.image)
-        self.store_image(self.perspective_corrected_image, filename, prefix = '6_perspective_corrected')
+        #self.store_image(self.perspective_corrected_image, filename, prefix = '6_perspective_corrected')
         return self.perspective_corrected_image       
 
     def get_threshold_value(self, img, ocr_model):
