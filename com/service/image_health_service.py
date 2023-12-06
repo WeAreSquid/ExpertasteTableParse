@@ -12,7 +12,7 @@ class ImageHealthService(ActWithImage):
         self.get_threshold_value(self.grayscale_image, ocr_model)
         self.threshold_image(self.grayscale_image)
         self.store_image(self.thresholded_image, filename, prefix = '3_threshold')
-        self.invert_image(self.thresholded_image)
+        self.invert_image(self.grayscale_image)
         self.store_image(self.inverted_image, filename, prefix = '4_inverted')
         self.dilate_image(self.inverted_image)
         self.store_image(self.dilated_image, filename, prefix = '5_dilated')
