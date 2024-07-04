@@ -1,11 +1,23 @@
 import cv2
 import numpy as np
 import re
-from com.utils.act_with_image import ActWithImage 
+from com.utils.act_with_image import ActWithImage
+from com.utils.remove_background import RemoveBackground
+from com.utils.perspective_correction import PerspectiveCorrection
 
 class ImageHealthService(ActWithImage):
     def clean_image(self, img, filename, ocr_model):
         self.set_image(img)
+        
+        rm_bg = RemoveBackground(self.image)
+        self.no_bg_img = rm_bg.main()
+
+        pers_correction = PerspectiveCorrection()
+        self.perspective_img = pers_correction.perspective_correction(self.no_bg_img)
+        
+        return self.perspective_img
+
+        """
         #self.store_image(self.image, filename, prefix = '1_original')
         self.convert_image_to_grayscale()
         #self.store_image(self.grayscale_image, filename, prefix = '2_grayscale')
@@ -22,8 +34,12 @@ class ImageHealthService(ActWithImage):
         self.order_points_in_the_contour_with_max_area(self.dilated_image)
         self.calculate_new_width_and_height_of_image(self.dilated_image)
         self.apply_perspective_transform(self.image)
+        self.store_image(self.perspective_corrected_image, filename, prefix = '5_PERSPECTIVEEE')
+        
         #self.store_image(self.perspective_corrected_image, filename, prefix = '6_perspective_corrected')
-        return self.perspective_corrected_image       
+        return self.perspective_corrected_image
+        """
+           
 
     def get_threshold_value(self, img, ocr_model):
         # Get the dimensions of the image

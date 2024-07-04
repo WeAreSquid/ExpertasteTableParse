@@ -1,7 +1,7 @@
 import numpy as np
 from com.utils.act_with_image import ActWithImage
 from com.utils.get_sub_cards import GetSubCards
-import re
+import re, Levenshtein
 
 
 class OCRCheck(ActWithImage):
@@ -15,16 +15,51 @@ class OCRCheck(ActWithImage):
         return self.card_info_dict
         
     def execute_paddleocr(self, img, ocr_model):
-        # Get the height and width of the image
-        height, width, channels = img.shape
-         
-        top_left_x = 0
-        top_left_y = 0
+        output_dict = self.get_entity(img, 'SAMPLERS', ocr_model)
+        try:
+            output_dict_cleaned = self.clean_samplers_name(output_dict)
+        except Exception as e:
+            print(e)
+        return output_dict_cleaned
+    
+    def clean_samplers_name(self, sampler_list_dictionary):
+        sampler_list = []
+        expected_samplers = ['sampler-a', 'sampler-b', 'sampler-c', 'sampler-d', 'sampler-e', 'sampler-f', 'sampler-g', 'sampler-h', 'sampler-i', 'sampler-j']
+        e_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        p_list = []
+        # TO ENHANCE WHATS UP WHEN SOME SAMPLER WORD IS NOT DETECTED!
+        if len(sampler_list_dictionary['entities']) == 10:
+            for element in sampler_list_dictionary['entities']:
+                if element['name'] in expected_samplers:
+                    p_list.append(expected_samplers.index(element['name']))          
+                    sampler_list.append((element['name'], element['centroid'], True, expected_samplers.index(element['name'])))
+                else:
+                    sampler_list.append((element['name'], element['centroid'], False, -1))
 
-        bottom_right_x = int(width / 3)
-        bottom_right_y = height
-        cropped_image = img[top_left_y:bottom_right_y, top_left_x:bottom_right_x]
+            missing_elements_ordered = [item for item in e_list if item not in p_list]
+            for l in missing_elements_ordered:
+                corrected_name = expected_samplers[l]
+                sampler_list_dictionary['entities'][l]['name'] = corrected_name
+            return sampler_list_dictionary
+        else:
+            return sampler_list_dictionary
         
+    def get_entity(self, img, entity, ocr_model):
+        height, width, channels = img.shape
+
+        if entity == 'SAMPLERS': 
+            top_left_x = 0
+            top_left_y = 0
+            bottom_right_x = int(width / 4)
+            bottom_right_y = height
+            cropped_image = img[top_left_y:bottom_right_y, top_left_x:bottom_right_x]
+        if entity == 'RATING':
+            top_left_x = width - int(width / 4)
+            top_left_y = 0
+            bottom_right_x = width
+            bottom_right_y = height
+            cropped_image = img[top_left_y:bottom_right_y, top_left_x:bottom_right_x] 
+
         result = ocr_model.ocr(cropped_image, cls=True)
         card_out = []
         _sampler_list = []
@@ -49,10 +84,22 @@ class OCRCheck(ActWithImage):
                 _sampler_dict['width'] = width
                 _sampler_dict['height'] = height
                 _sampler_dict['centroid'] = [centroid[0], centroid[1]]
-                if re.search('sampler', confidence[0].lower()):
-                    _sampler_list.append(_sampler_dict)
-                else:
-                    _first_entities_list.append(_sampler_dict)
+                
+                if entity == 'SAMPLERS':
+                    label = confidence[0].lower()
+                    ideal = 'sampler'
+                    distance = Levenshtein.distance(label, ideal)
+                    similarity = 1 - (distance / max(len(label), len(ideal)))
+                    if similarity >= 0.5:
+                        _sampler_list.append(_sampler_dict)
+                    else:
+                        _first_entities_list.append(_sampler_dict)
+
+                if entity == 'RATING':
+                    if re.search('rating', confidence[0].lower()):
+                        _sampler_list.append(_sampler_dict)
+                    else:
+                        _first_entities_list.append(_sampler_dict)
                     
         self.sampler_list = _sampler_list
         self.first_entities_list = _first_entities_list
@@ -80,7 +127,6 @@ class OCRCheck(ActWithImage):
                 _centroid_entity = entity['centroid']
                 if _centroid_entity[1] >= _centroid_sampler[1] - int(_width_sampler/2.5) and _centroid_entity[1] <= _centroid_sampler[1] + int(_width_sampler/2.5):
                     entitites_list.append({'name': _name_entity, 'width': _width_entity, 'height': _height_entity, 'centroid' : _centroid_entity})
-            self.output_dict['first_entities_found'].append({'name': _name_sampler, 'first_entities': entitites_list})
-                       
+            self.output_dict['first_entities_found'].append({'name': _name_sampler, 'first_entities': entitites_list})        
         return self.output_dict
                 
